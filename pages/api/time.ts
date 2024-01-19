@@ -6,7 +6,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log("백앤드 도차크");
+  console.log("time api");
   let { data: time, error } = await supabase.from("time").select("*");
   if (error) {
     console.error(error);
