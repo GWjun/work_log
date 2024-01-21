@@ -4,5 +4,5 @@ interface Time {
   start: string;
   end: string;
   time: string;
-  sum: string;
+  sum: number;
 }

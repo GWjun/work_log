@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useAppContext } from "@/context/context";
+
 import { supabase } from "@/utils/supabaseClient";
 import {
   fetchGoogleUserInfo,
@@ -8,18 +10,19 @@ import {
 } from "@/utils/googleAccount";
 import dynamic from "next/dynamic";
 
-const DynamicComponent = dynamic(() => import("../components/DateTime"), {
+const ModalWindow = dynamic(() => import("./ModalWindow"), {
   ssr: false,
 });
 
 export default function Table() {
-  const [time, setTime] = useState<Time[]>([]);
+  const { time, setTime } = useAppContext();
   const [user, setUser] = useState<any | null>(null);
 
   const fetcherTime = async () => {
     const response: Response = await fetch("/api/time");
     const data: Time[] = await response.json();
     setTime(data);
+    console.log("Time:", time);
 
     const userInfo = await fetchGoogleUserInfo();
     if (userInfo) {
@@ -29,42 +32,24 @@ export default function Table() {
     console.log(localStorage.getItem("access_token"));
   };
 
-  const insertDataToDatabase = async () => {
-    try {
-      // 가상의 데이터
-      const newData: Time = {
-        date: new Date().toLocaleTimeString(),
-        start: new Date().toLocaleTimeString(),
-        end: new Date().toLocaleTimeString(),
-        time: new Date().toLocaleTimeString(),
-        sum: new Date().toLocaleTimeString(),
-      };
-
-      const { data, error } = await supabase.from("time").upsert([newData]);
-      if (error) {
-        console.error("Error inserting data to Supabase:", error.message);
-        throw error;
-      }
-    } catch (error) {
-      alert("데이터 삽입에 실패하였습니다.");
-      throw error;
-    }
-  };
-
   const handleDelete = async (index: number) => {
     try {
-      const deletedItem = time[index];
-      const { data, error } = await supabase
-        .from("time")
-        .delete()
-        .eq("id", deletedItem.id);
+      const shouldDelete = window.confirm("삭제하시겠습니까?");
 
-      if (error) {
-        console.error("Error deleting data from Supabase:", error.message);
-        throw error;
+      if (shouldDelete) {
+        const deletedItem = time[index];
+        const { data, error } = await supabase
+          .from("time")
+          .delete()
+          .eq("id", deletedItem.id);
+
+        if (error) {
+          console.error("Error deleting data from Supabase:", error.message);
+          throw error;
+        }
+
+        setTime((prevTime) => prevTime.filter((_, i) => i !== index));
       }
-
-      setTime((prevTime) => prevTime.filter((_, i) => i !== index));
     } catch (error) {
       console.error("Error deleting data:", error);
     }
@@ -159,7 +144,9 @@ export default function Table() {
                       {time.time}
                     </td>
                     <td className="whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-0">
-                      {time.sum}
+                      {`${Math.floor(time.sum / 60)}시간 ${Math.floor(
+                        time.sum % 60
+                      )}분`}
                     </td>
                     <td className="whitespace-nowrap p-4 flex items-center justify-center">
                       <button onClick={() => handleDelete(index)}>
@@ -176,22 +163,7 @@ export default function Table() {
             </table>
 
             <div className="flex justify-end py-4">
-              {user && (
-                <button
-                  type="button"
-                  className="block rounded-md bg-zinc-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  onClick={async () => {
-                    try {
-                      await insertDataToDatabase();
-                      fetcherTime();
-                    } catch (error) {
-                      console.error("Error inserting data to database:", error);
-                    }
-                  }}
-                >
-                  시간 추가
-                </button>
-              )}
+              {user && <ModalWindow fetcherTime={fetcherTime} />}
             </div>
           </div>
         </div>
