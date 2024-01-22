@@ -16,6 +16,7 @@ interface ModalWindowProps {
 
 const ModalWindow: React.FC<ModalWindowProps> = ({ fetcherTime }) => {
   const { time, setTime } = useAppContext();
+  const { user, setUser } = useAppContext();
   const [newTime, setNewTime] = useState<string[]>([]);
 
   const insertDataToDatabase = async () => {
@@ -34,6 +35,7 @@ const ModalWindow: React.FC<ModalWindowProps> = ({ fetcherTime }) => {
       if (time.length !== 0) sum = totalMinutes + time[time.length - 1].sum;
 
       const newData: Time = {
+        username: user[0],
         date: newTime[0].slice(0, 10),
         start: newTime[0].slice(11, 16),
         end: newTime[1].slice(11, 16),
@@ -41,7 +43,7 @@ const ModalWindow: React.FC<ModalWindowProps> = ({ fetcherTime }) => {
         sum: sum,
       };
 
-      const { data, error } = await supabase.from("time").upsert([newData]);
+      const { data, error } = await supabase.from(`time`).upsert([newData]);
       if (error) {
         console.error("Error inserting data to Supabase:", error.message);
         throw error;
