@@ -94,12 +94,15 @@ export default function Table() {
   }, [user]);
 
   useEffect(() => {
-    if (window.location.hash.startsWith("#access_token")) {
+    if (
+      typeof window !== "undefined" &&
+      window.location.hash.startsWith("#access_token")
+    ) {
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
     }
-  }, [window.location.href]);
+  }, [typeof window !== "undefined" && window.location.href]);
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
