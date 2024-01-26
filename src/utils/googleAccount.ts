@@ -15,5 +15,5 @@ export const googleLogin = async () => {
 export async function googleLogout() {
   const { error } = await supabase.auth.signOut();
   alert("로그아웃 되었습니다.");
-  window.location.href = "/";
+  window.location.href = "/login";
 }
