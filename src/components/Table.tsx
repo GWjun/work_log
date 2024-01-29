@@ -1,9 +1,8 @@
-"use client";
-import { useEffect } from "react";
 import { useAppContext } from "@/context/context";
 
 import { supabase } from "@/utils/supabaseClient";
 import { googleLogin, googleLogout } from "@/utils/googleAccount";
+
 import dynamic from "next/dynamic";
 
 const ModalWindow = dynamic(() => import("./ModalWindow"), {
@@ -12,22 +11,7 @@ const ModalWindow = dynamic(() => import("./ModalWindow"), {
 
 export default function Table() {
   const { time, setTime } = useAppContext();
-  const { user, setUser } = useAppContext();
-
-  const fetcherUser = async () => {
-    const localData = JSON.parse(
-      localStorage.getItem("sb-meinnuxtjuwqmpofgqda-auth-token") || "{}"
-    );
-
-    if (Object.keys(localData).length !== 0) {
-      setUser([
-        localData.user.user_metadata.email,
-        localData.user.user_metadata.full_name,
-      ]);
-    } else {
-      setUser([]);
-    }
-  };
+  const { user } = useAppContext();
 
   const fetcherTime = async () => {
     const localData = JSON.parse(
@@ -83,27 +67,7 @@ export default function Table() {
     }
   };
 
-  useEffect(() => {
-    fetcherUser();
-  }, []);
-
-  useEffect(() => {
-    if (user.length > 0) {
-      fetcherTime();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.hash.startsWith("#access_token")
-    ) {
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-    }
-  }, [typeof window !== "undefined" && window.location.href]);
-
+  fetcherTime();
   return (
     <>
       <section className="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">

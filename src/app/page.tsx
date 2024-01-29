@@ -1,12 +1,13 @@
+"use client";
 import React from "react";
 import { AppProvider } from "@/context/context";
 
-import Table from "@/components/Table";
+import User from "@/components/User";
 
 export default function Home() {
   return (
     <AppProvider>
-      <Table />
+      <User />
     </AppProvider>
   );
 }
